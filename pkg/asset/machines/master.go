@@ -112,6 +112,7 @@ func (m *Master) Name() string {
 // Master asset
 func (m *Master) Dependencies() []asset.Asset {
 	return []asset.Asset{
+		&installconfig.PlatformCreds{},
 		&installconfig.ClusterID{},
 		// PlatformCredsCheck just checks the creds (and asks, if needed)
 		// We do not actually use it in this asset directly, hence
@@ -135,11 +136,12 @@ func awsDefaultMasterMachineTypes(region string) []string {
 // Generate generates the Master asset.
 func (m *Master) Generate(dependencies asset.Parents) error {
 	ctx := context.TODO()
+	platformCreds := &installconfig.PlatformCreds{}
 	clusterID := &installconfig.ClusterID{}
 	installConfig := &installconfig.InstallConfig{}
 	rhcosImage := new(rhcos.Image)
 	mign := &machine.Master{}
-	dependencies.Get(clusterID, installConfig, rhcosImage, mign)
+	dependencies.Get(platformCreds, clusterID, installConfig, rhcosImage, mign)
 
 	ic := installConfig.Config
 

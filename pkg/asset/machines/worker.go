@@ -166,6 +166,7 @@ func (w *Worker) Name() string {
 // Worker asset
 func (w *Worker) Dependencies() []asset.Asset {
 	return []asset.Asset{
+		&installconfig.PlatformCreds{},
 		&installconfig.ClusterID{},
 		// PlatformCredsCheck just checks the creds (and asks, if needed)
 		// We do not actually use it in this asset directly, hence
@@ -180,11 +181,12 @@ func (w *Worker) Dependencies() []asset.Asset {
 // Generate generates the Worker asset.
 func (w *Worker) Generate(dependencies asset.Parents) error {
 	ctx := context.TODO()
+	platformCreds := &installconfig.PlatformCreds{}
 	clusterID := &installconfig.ClusterID{}
 	installConfig := &installconfig.InstallConfig{}
 	rhcosImage := new(rhcos.Image)
 	wign := &machine.Worker{}
-	dependencies.Get(clusterID, installConfig, rhcosImage, wign)
+	dependencies.Get(platformCreds, clusterID, installConfig, rhcosImage, wign)
 
 	machineConfigs := []*mcfgv1.MachineConfig{}
 	machineSets := []runtime.Object{}

@@ -31,6 +31,7 @@ var _ asset.Asset = (*PlatformCredsCheck)(nil)
 // Dependencies returns the dependencies for PlatformCredsCheck
 func (a *PlatformCredsCheck) Dependencies() []asset.Asset {
 	return []asset.Asset{
+		&PlatformCreds{},
 		&InstallConfig{},
 	}
 }
@@ -38,8 +39,9 @@ func (a *PlatformCredsCheck) Dependencies() []asset.Asset {
 // Generate queries for input from the user.
 func (a *PlatformCredsCheck) Generate(dependencies asset.Parents) error {
 	ctx := context.TODO()
+	platformCreds := &PlatformCreds{}
 	ic := &InstallConfig{}
-	dependencies.Get(ic)
+	dependencies.Get(platformCreds, ic)
 
 	var err error
 	platform := ic.Config.Platform.Name()

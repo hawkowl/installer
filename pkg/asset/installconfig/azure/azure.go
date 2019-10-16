@@ -19,10 +19,10 @@ const (
 )
 
 // Platform collects azure-specific configuration.
-func Platform() (*azure.Platform, error) {
+func Platform(credentials *Credentials) (*azure.Platform, error) {
 	// Create client using public cloud because install config has not been generated yet.
 	const cloudName = azure.PublicCloud
-	ssn, err := GetSession(cloudName)
+	ssn, err := GetSession(cloudName, credentials)
 	if err != nil {
 		return nil, err
 	}

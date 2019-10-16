@@ -24,14 +24,16 @@ var _ asset.Asset = (*baseDomain)(nil)
 // Dependencies returns no dependencies.
 func (a *baseDomain) Dependencies() []asset.Asset {
 	return []asset.Asset{
+		&PlatformCreds{},
 		&platform{},
 	}
 }
 
 // Generate queries for the base domain from the user.
 func (a *baseDomain) Generate(parents asset.Parents) error {
+	platformCreds := &PlatformCreds{}
 	platform := &platform{}
-	parents.Get(platform)
+	parents.Get(platformCreds, platform)
 
 	var err error
 	switch platform.CurrentName() {
@@ -43,7 +45,7 @@ func (a *baseDomain) Generate(parents asset.Parents) error {
 		}
 	case azure.Name:
 		// Create client using public cloud because install config has not been generated yet.
-		ssn, err := azureconfig.GetSession(azure.PublicCloud)
+		ssn, err := azureconfig.GetSession(azure.PublicCloud, platformCreds.Azure)
 		if err != nil {
 			return err
 		}

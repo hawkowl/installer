@@ -54,6 +54,7 @@ func (o *Openshift) Name() string {
 // Openshift asset
 func (o *Openshift) Dependencies() []asset.Asset {
 	return []asset.Asset{
+		&installconfig.PlatformCreds{},
 		&installconfig.InstallConfig{},
 		&installconfig.ClusterID{},
 		&password.KubeadminPassword{},
@@ -70,11 +71,12 @@ func (o *Openshift) Dependencies() []asset.Asset {
 
 // Generate generates the respective operator config.yml files
 func (o *Openshift) Generate(dependencies asset.Parents) error {
+	platformCreds := &installconfig.PlatformCreds{}
 	installConfig := &installconfig.InstallConfig{}
 	clusterID := &installconfig.ClusterID{}
 	kubeadminPassword := &password.KubeadminPassword{}
 	openshiftInstall := &openshiftinstall.Config{}
-	dependencies.Get(installConfig, kubeadminPassword, clusterID, openshiftInstall)
+	dependencies.Get(platformCreds, installConfig, kubeadminPassword, clusterID, openshiftInstall)
 	var cloudCreds cloudCredsSecretData
 	platform := installConfig.Config.Platform.Name()
 	switch platform {

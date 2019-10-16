@@ -48,6 +48,7 @@ func (*DNS) Name() string {
 // the asset.
 func (*DNS) Dependencies() []asset.Asset {
 	return []asset.Asset{
+		&installconfig.PlatformCreds{},
 		&installconfig.InstallConfig{},
 		&installconfig.ClusterID{},
 		// PlatformCredsCheck just checks the creds (and asks, if needed)
@@ -59,9 +60,10 @@ func (*DNS) Dependencies() []asset.Asset {
 
 // Generate generates the DNS config and its CRD.
 func (d *DNS) Generate(dependencies asset.Parents) error {
+	platformCreds := &installconfig.PlatformCreds{}
 	installConfig := &installconfig.InstallConfig{}
 	clusterID := &installconfig.ClusterID{}
-	dependencies.Get(installConfig, clusterID)
+	dependencies.Get(platformCreds, installConfig, clusterID)
 
 	config := &configv1.DNS{
 		TypeMeta: metav1.TypeMeta{
