@@ -1,7 +1,6 @@
 package installconfig
 
 import (
-	"context"
 	"os"
 
 	"github.com/ghodss/yaml"
@@ -10,12 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/openshift/installer/pkg/asset"
-	"github.com/openshift/installer/pkg/asset/installconfig/aws"
 	icazure "github.com/openshift/installer/pkg/asset/installconfig/azure"
-	icgcp "github.com/openshift/installer/pkg/asset/installconfig/gcp"
-	icopenstack "github.com/openshift/installer/pkg/asset/installconfig/openstack"
-	icovirt "github.com/openshift/installer/pkg/asset/installconfig/ovirt"
-	icvsphere "github.com/openshift/installer/pkg/asset/installconfig/vsphere"
 	"github.com/openshift/installer/pkg/types"
 	"github.com/openshift/installer/pkg/types/conversion"
 	"github.com/openshift/installer/pkg/types/defaults"
@@ -30,7 +24,6 @@ const (
 type InstallConfig struct {
 	Config *types.InstallConfig `json:"config"`
 	File   *asset.File          `json:"file"`
-	AWS    *aws.Metadata        `json:"aws,omitempty"`
 	Azure  *icazure.Metadata    `json:"azure,omitempty"`
 }
 
@@ -135,9 +128,6 @@ func (a *InstallConfig) Load(f asset.FileFetcher) (found bool, err error) {
 func (a *InstallConfig) finish(filename string, platformCreds *PlatformCreds) error {
 	defaults.SetInstallConfigDefaults(a.Config)
 
-	if a.Config.AWS != nil {
-		a.AWS = aws.NewMetadata(a.Config.Platform.AWS.Region, a.Config.Platform.AWS.Subnets, a.Config.AWS.ServiceEndpoints)
-	}
 	if a.Config.Azure != nil {
 		a.Azure = icazure.NewMetadata(a.Config.Azure.CloudName, platformCreds.Azure)
 	}
@@ -170,25 +160,6 @@ func (a *InstallConfig) platformValidation(platformCreds *PlatformCreds) error {
 			return err
 		}
 		return icazure.Validate(client, a.Config)
-	}
-	if a.Config.Platform.GCP != nil {
-		client, err := icgcp.NewClient(context.TODO())
-		if err != nil {
-			return err
-		}
-		return icgcp.Validate(client, a.Config)
-	}
-	if a.Config.Platform.AWS != nil {
-		return aws.Validate(context.TODO(), a.AWS, a.Config)
-	}
-	if a.Config.Platform.VSphere != nil {
-		return icvsphere.Validate(a.Config)
-	}
-	if a.Config.Platform.Ovirt != nil {
-		return icovirt.Validate(a.Config)
-	}
-	if a.Config.Platform.OpenStack != nil {
-		return icopenstack.Validate(a.Config)
 	}
 	return field.ErrorList{}.ToAggregate()
 }
